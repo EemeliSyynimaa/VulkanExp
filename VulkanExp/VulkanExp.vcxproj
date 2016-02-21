@@ -20,7 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1409CE12-9B40-4044-8C83-09495F68FB20}</ProjectGuid>
-    <RootNamespace>Vulkan</RootNamespace>
+    <RootNamespace>VulkanExp</RootNamespace>
+    <ProjectName>VulkanExp</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -66,13 +67,21 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(ProjectDir)obj/$(Configuration)/</IntDir>
+    <IntDir>$(ProjectDir)obj/$(Platform)/$(Configuration)/</IntDir>
+    <OutDir>$(SolutionDir)Build/$(Platform)/$(Configuration)/</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(ProjectDir)obj/$(Platform)/$(Configuration)/</IntDir>
+    <OutDir>$(SolutionDir)Build/$(Platform)/$(Configuration)/</OutDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(ProjectDir)obj/$(Configuration)/</IntDir>
+    <IntDir>$(ProjectDir)obj/$(Platform)/$(Configuration)/</IntDir>
+    <OutDir>$(SolutionDir)Build/$(Platform)/$(Configuration)/</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(ProjectDir)obj/$(Platform)/$(Configuration)/</IntDir>
+    <OutDir>$(SolutionDir)Build/$(Platform)/$(Configuration)/</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>

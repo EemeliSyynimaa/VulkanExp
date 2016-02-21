@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Vulkan", "Vulkan\Vulkan.vcxproj", "{1409CE12-9B40-4044-8C83-09495F68FB20}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VulkanExp", "VulkanExp\VulkanExp.vcxproj", "{1409CE12-9B40-4044-8C83-09495F68FB20}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
