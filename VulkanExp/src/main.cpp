@@ -4,8 +4,62 @@
 
 #include "vulkan/vulkan.h"
 
+void checkResult(const VkResult& result, const std::string& action)
+{
+	std::string temp;
+
+	switch (result)
+	{
+	case VK_SUCCESS:
+		temp = "SUCCESS"; break;
+	case VK_NOT_READY:
+		temp = "NOT READY"; break;
+	case VK_TIMEOUT:
+		temp = "TIMEOUT"; break;
+	case VK_EVENT_SET:
+		temp = "EVENT SET"; break;
+	case VK_EVENT_RESET:
+		temp = "EVENT RESET"; break;
+	case VK_INCOMPLETE: 
+		temp = "INCOMPLETE"; break;
+	case VK_ERROR_OUT_OF_HOST_MEMORY:
+		temp = "ERROR OUT OF HOST MEMORY"; break;
+	case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+		temp = "ERROR OUT OF DEVICE MEMORY"; break;
+	case VK_ERROR_INITIALIZATION_FAILED:
+		temp = "ERROR INITIALIZATION FAILED"; break;
+	case VK_ERROR_DEVICE_LOST:
+		temp = "ERROR DEVICE LOST"; break;
+	case VK_ERROR_MEMORY_MAP_FAILED:
+		temp = "ERROR MEMORY MAP FAILED"; break;
+	case VK_ERROR_LAYER_NOT_PRESENT:
+		temp = "ERROR LAYER NOT PRESENT"; break;
+	case VK_ERROR_EXTENSION_NOT_PRESENT:
+		temp = "ERROR EXTENSION NOT PRESENT"; break;
+	case VK_ERROR_INCOMPATIBLE_DRIVER:
+		temp = "ERROR INCOMPATIBLE DRIVER"; break;
+	case VK_ERROR_TOO_MANY_OBJECTS: 
+		temp = "ERROR TOO MANY OBJECTS"; break;
+	case VK_ERROR_FORMAT_NOT_SUPPORTED:
+		temp = "ERROR FORMAT NOT SUPPORTED"; break;
+	default:
+		temp = "SURPRISE ERROR"; break;
+	}
+
+	std::cout << "Result of " << action << ": " << temp << std::endl;
+}
+
 int main(int argc, char**argv)
 {
+	// Variables.
+	VkInstance instance;
+	VkResult result;
+	VkDevice device;
+	VkQueue queue;
+	VkCommandPool commandPool;
+	VkCommandBuffer commandBuffer;
+
+	// Info structures for application and instance.
 	VkApplicationInfo appInfo;
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pNext = NULL;
@@ -25,20 +79,10 @@ int main(int argc, char**argv)
 	instInfo.enabledLayerCount = 0;
 	instInfo.ppEnabledLayerNames = NULL;
 
-	VkInstance instance;
-	VkResult result;
-	VkDevice device;
-	VkQueue queue;
-
+	// Create instance.
 	result = vkCreateInstance(&instInfo, NULL, &instance);
 
-	switch (result)
-	{
-	case VK_SUCCESS: 
-		std::cout << "SUCCESS" << std::endl; break;
-	default: 
-		std::cout << "SUPER ERROR" << std::endl; break;
-	}
+	checkResult(result, "INSTANCE");
 
 	// Enumerate physical devices.
 	uint32_t deviceCount = 0;
@@ -103,11 +147,13 @@ int main(int argc, char**argv)
 						queuePriorities[i] = 1.0f;
 					}
 
+					std::cout << "This family has bits: ";
+
 					// Is this correct? :D
-					if (queue.queueFlags & VK_QUEUE_GRAPHICS_BIT) std::cout << "IS GRAPHICS" << std::endl;
-					if (queue.queueFlags & VK_QUEUE_COMPUTE_BIT) std::cout << "IS COMPUTE" << std::endl;
-					if (queue.queueFlags & VK_QUEUE_TRANSFER_BIT) std::cout << "IS TRANSFER" << std::endl;
-					if (queue.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) std::cout << "IS SPARSE BINDING" << std::endl;
+					if (queue.queueFlags & VK_QUEUE_GRAPHICS_BIT) std::cout << " GRAPHICS";
+					if (queue.queueFlags & VK_QUEUE_COMPUTE_BIT) std::cout << "  COMPUTE";
+					if (queue.queueFlags & VK_QUEUE_TRANSFER_BIT) std::cout << "  TRANSFER";
+					if (queue.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT) std::cout << "  SPARSE BINDING" << std::endl;
 				}
 			}
 		}
@@ -115,7 +161,7 @@ int main(int argc, char**argv)
 
 	// Create logical device.
 	// We just take the first physical device in the list.
-
+	// Maybe we should take the one with the necessary bits? Graphics etc.
 	VkDeviceQueueCreateInfo queInfo;
 	queInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 	queInfo.pNext = NULL;
@@ -140,16 +186,69 @@ int main(int argc, char**argv)
 
 	result = vkCreateDevice(physicalDevices[0], &devInfo, NULL, &device);
 
-	switch (result)
-	{
-	case VK_SUCCESS:
-		std::cout << "SUCCESS" << std::endl; break;
-	default:
-		std::cout << "SUPER ERROR" << std::endl; break;
-	}
+	checkResult(result, "DEVICE");
 
+	// Get queue 0 from family 0.
 	vkGetDeviceQueue(device, 0, 0, &queue);
 
+	// Create command pool.
+	VkCommandPoolCreateInfo comPoolInfo;
+	comPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	comPoolInfo.pNext = NULL;
+	comPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	comPoolInfo.queueFamilyIndex = 0;
+	
+	result = vkCreateCommandPool(device, &comPoolInfo, NULL, &commandPool);
+
+	checkResult(result, "COMMAND POOL");
+
+	//// Allocate command buffer.
+	VkCommandBufferAllocateInfo comBuffAllocInfo;
+	comBuffAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	comBuffAllocInfo.pNext = NULL;
+	comBuffAllocInfo.commandPool = commandPool;
+	comBuffAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	comBuffAllocInfo.commandBufferCount = 1;
+
+	result = vkAllocateCommandBuffers(device, &comBuffAllocInfo, &commandBuffer);
+
+	checkResult(result, "COMMAND BUFFER ALLOC");
+
+	// Begin command buffer.
+	VkCommandBufferBeginInfo comBuffBegInfo;
+	comBuffBegInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	comBuffBegInfo.pNext = NULL;
+	comBuffBegInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	comBuffBegInfo.pInheritanceInfo = NULL;
+
+	result = vkBeginCommandBuffer(commandBuffer, &comBuffBegInfo);
+
+	checkResult(result, "COMMAND BUFFER BEGIN");
+
+	// End command buffer.
+	result = vkEndCommandBuffer(commandBuffer);
+
+	checkResult(result, "COMMAND BUFFER END");
+
+	// Submit command buffer to queue.
+	VkSubmitInfo submitInfo;
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.pNext = NULL;
+	submitInfo.waitSemaphoreCount = 0;
+	submitInfo.pWaitSemaphores = NULL;
+	submitInfo.pWaitDstStageMask = NULL;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandBuffer;
+	submitInfo.signalSemaphoreCount = 0;
+	submitInfo.pSignalSemaphores = NULL;
+
+	result = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+
+	checkResult(result, "QUEUE SUBMIT");
+
+	// Destroy everything.
+	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+	vkDestroyCommandPool(device, commandPool, NULL);
 	vkDestroyDevice(device, NULL);
 	vkDestroyInstance(instance, NULL);
 
