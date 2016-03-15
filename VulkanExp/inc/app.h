@@ -1,8 +1,9 @@
 #pragma once
 
 #include <string>
-#include "vulkan/vulkan.h"
+
 #include "SDL2/SDL.h"
+#include "renderer.h"
 
 class App
 {
@@ -14,26 +15,16 @@ public:
 	void run();
 	void deinit();
 private:
-	void update();
-
 	void handleEvents();
+	void update();
+	void render();
 
 	void initSDL();
 	void deinitSDL();
 
-	void initVulkan();
-	void deinitVulkan();
+	Renderer renderer;
 
-	void checkResult(const VkResult& result, const std::string& action);
-
-	VkInstance instance;
-	VkResult result;
-	VkDevice device;
-	VkQueue queue;
-	VkCommandPool commandPool;
-	VkCommandBuffer commandBuffer;
-
-	const std::string name;
+	const std::string title;
 	const int width;
 	const int height;
 	bool running;
